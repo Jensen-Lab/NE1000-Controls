@@ -17,8 +17,8 @@ def unit_convert(units):
 
 	return unit
 
-class pupmp:
-	def __init__(self,port,baud=300,delay=0.1):
+class pump:
+	def __init__(self,port,baud=600,delay=0.1):
 		self.ser = serial.Serial(port,baud,parity=serial.PARITY_NONE, bytesize=8,stopbits=1)
 		self.sleep = lambda:time.sleep(delay)
 
