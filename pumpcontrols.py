@@ -18,7 +18,7 @@ def unit_convert(units):
 	return unit
 
 class pump:
-	def __init__(self,port,baud=600,delay=0.1):
+	def __init__(self,port,baud=2400,delay=0.1):
 		self.ser = serial.Serial(port,baud,parity=serial.PARITY_NONE, bytesize=8,stopbits=1)
 		self.sleep = lambda:time.sleep(delay)
 
@@ -59,3 +59,19 @@ class pump:
 	def increment(self,rate_increase=0,units='mlh'):
 		unit = unit_convert(units)
 		self.comms(f'INC {rate_increase} {unit}')
+		
+		
+if __name__=='__main__':
+	p = pump('/dev/ttyUSB0',2400,delay=0.1)
+	
+	p.buzzer()
+
+	
+	p.rate(10)
+	p.start()
+	time.sleep(5)
+	p.direction()
+	time.sleep(5)
+	p.stop()
+	
+	p.buzzer()
