@@ -1,0 +1,494 @@
+{
+    "measurement_001": {
+        "height":   85,
+        "nozzle":   1
+    },
+    "measurement_002": {
+        "height":   83.5,
+        "nozzle":   1
+    },
+    "measurement_003": {
+        "height":   82.9,
+        "nozzle":   1
+    },
+    "measurement_004": {
+        "height":   81,
+        "nozzle":   1
+    },
+    "measurement_005": {
+        "height":   80,
+        "nozzle":   1
+    },
+    "measurement_006": {
+        "height":   79,
+        "nozzle":   1
+    },
+    "measurement_007": {
+        "height":   78,
+        "nozzle":   1
+    },
+    "measurement_008": {
+        "height":   77,
+        "nozzle":   1
+    },
+    "measurement_009": {
+        "height":   75,
+        "nozzle":   2
+    },
+    "measurement_010": {
+        "height":   74,
+        "nozzle":   2
+    },
+    "measurement_011": {
+        "height":   73,
+        "nozzle":   2
+    },
+    "measurement_012": {
+        "height":    73,
+        "nozzle":   3
+    },
+    "measurement_013": {
+        "height":   73,
+        "nozzle":   4
+    },
+    "measurement_014": {
+        "height":   79.5,
+        "nozzle":   0
+    },
+    "measurement_015": {
+        "height":   79.5,
+        "nozzle":   4
+    },
+    "measurement_016": {
+        "height":   79.5,
+        "nozzle":   0
+    },
+    "measurement_017": {
+        "height":   77.5,
+        "nozzle":   4
+    },
+    "measurement_018": {
+        "height":   77.5,
+        "nozzle":   0
+    },
+    "measurement_019": {
+        "height":   77.5,
+        "nozzle":   5
+    },
+    "measurement_020": {
+        "height":   76,
+        "nozzle":   5
+    },
+    "measurement_021": {
+        "height":   74.5,
+        "nozzle":   5
+    },
+    "measurement_022": {
+        "height":   72.5,
+        "nozzle":   5
+    },
+    "measurement_023": {
+        "height":   71,
+        "nozzle":   5
+    },
+    "measurement_024": {
+        "height":   69.5,
+        "nozzle":   5
+    },
+    "measurement_025": {
+        "height":   68,
+        "nozzle":   5
+    },
+    "measurement_026": {
+        "height":   66,
+        "nozzle":   5
+    },
+    "measurement_027": {
+        "height":   63.5,
+        "nozzle":   5
+    },
+    "measurement_028": {
+        "height":   62,
+        "nozzle":   0
+    },
+    "measurement_029": {
+        "height":   87.5,
+        "nozzle":   0
+    },
+    "measurement_030": {
+        "height":   87.5,
+        "nozzle":   6
+    },
+    "measurement_031": {
+        "height":   80,
+        "nozzle":   7
+    },
+    "measurement_032": {
+        "height":   80,
+        "nozzle":   7
+    },
+    "measurement_033": {
+        "height":   80,
+        "nozzle":   7
+    },
+    "measurement_034": {
+        "height":   80,
+        "nozzle":   7
+    },
+    "measurement_035": {
+        "height":   80,
+        "nozzle":   7
+    },
+    "measurement_036": {
+        "height":   80,
+        "nozzle":   7
+    },
+    "measurement_037": {
+        "height":   150,
+        "nozzle":   8
+    },
+    "measurement_038": {
+        "height":   150,
+        "nozzle":   8
+    },
+    "measurement_039": {
+        "height":   150,
+        "nozzle":   0
+    },
+    "measurement_040": {
+        "height":   150,
+        "nozzle":   0
+    },
+    "measurement_041": {
+        "height":   150,
+        "nozzle":   9
+    },
+    "measurement_042": {
+        "height":   150,
+        "nozzle":   9
+    },
+    "measurement_043": {
+        "height":   150,
+        "nozzle":   9
+    },
+    "measurement_044": {
+        "height":   150,
+        "nozzle":   0
+    },
+    "measurement_045": {
+        "height":   150,
+        "nozzle":   0
+    },
+    "measurement_046": {
+        "height":   150,
+        "nozzle":    9
+    },
+    "measurement_047": {
+        "height":   150,
+        "nozzle":   10
+    },
+    "measurement_048": {
+        "height":   150,
+        "nozzle":   0
+    },
+    "measurement_049": {
+        "height":   150,
+        "nozzle":   10
+    },
+    "measurement_050": {
+        "height":   150,
+        "nozzle":   10
+    },
+    "measurement_051": {
+        "height":   150,
+        "nozzle":   10
+    },
+    "measurement_052": {
+        "height":   150,
+        "nozzle":   11
+    },
+    "measurement_053": {
+        "height":   150,
+        "nozzle":   11
+    },
+    "measurement_054": {
+        "height":   150,
+        "nozzle":    12
+    },
+    "measurement_055": {
+        "height":   150,
+        "nozzle":   12
+    },
+    "measurement_056": {
+        "height":   150,
+        "nozzle":   12
+    },
+    "measurement_057": {
+        "height":   150,
+        "nozzle":   13
+    },
+    "measurement_058": {
+        "height":   150,
+        "nozzle":   13
+    },
+    "measurement_059": {
+        "height":   150,
+        "nozzle":   13
+    },
+    "measurement_060": {
+        "height":   150,
+        "nozzle":   14
+    },
+    "measurement_061": {
+        "height":   150,
+        "nozzle":   15
+    },
+    "measurement_062": {
+        "height":   150,
+        "nozzle":   15
+    },
+    "measurement_063": {
+        "height":   126.5,
+        "nozzle":   16
+    },
+    "measurement_064": {
+        "height":   114.5,
+        "nozzle":   16
+    },
+    "measurement_065": {
+        "height":   109.5,
+        "nozzle":   16
+    },
+    "measurement_066": {
+        "height":   103,
+        "nozzle":   16
+    },
+    "measurement_067": {
+        "height":    98,
+        "nozzle":   16
+    },
+    "measurement_068": {
+        "height":   89.5,
+        "nozzle":   16
+    },
+    "measurement_069": {
+        "height":   67,
+        "nozzle":   16
+    },
+    "measurement_070": {
+        "height":   59,
+        "nozzle":   16 
+    },
+    "measurement_071": {
+        "height":   52.5,
+        "nozzle":   16
+    },
+    "measurement_072": {
+        "height":   44,
+        "nozzle":   16
+    },
+    "measurement_073": {
+        "height":   36.5,
+        "nozzle":   16
+    },
+    "measurement_074": {
+        "height":   25,
+        "nozzle":   16
+    },
+    "measurement_075": {
+        "height":   -1.5,
+        "nozzle":   16
+    },
+    "measurement_076": {
+        "height":   -13,
+        "nozzle":   16
+    },
+    "measurement_077": {
+        "height":   -24,
+        "nozzle":   16
+    },
+    "measurement_078": {
+        "height":   -37,
+        "nozzle":   16
+    },
+    "measurement_079": {
+        "height":   -45,
+        "nozzle":   16
+    },
+    "measurement_080": {
+        "height":   -64.5,
+        "nozzle":   16
+    },
+    "measurement_081": {
+        "height":   -76,
+        "nozzle":   16
+    },
+    "measurement_082": {
+        "height":   -90,
+        "nozzle":   16
+    },
+    "measurement_083": {
+        "height":   150,
+        "nozzle":   17
+    },
+    "measurement_084": {
+        "height":   150,
+        "nozzle":   18
+    },
+    "measurement_085": {
+        "height":   150,
+        "nozzle":   23
+    },
+    "measurement_086": {
+        "height":   127,
+        "nozzle":   19
+    },
+    "measurement_087": {
+        "height":   121,
+        "nozzle":   19
+    },
+    "measurement_088": {
+        "height":   98,
+        "nozzle":   19
+    },
+    "measurement_089": {
+        "height":   93,
+        "nozzle":   19
+    },
+    "measurement_090": {
+        "height":   93,
+        "nozzle":   19
+    },
+    "measurement_091": {
+        "height":   87,
+        "nozzle":   19
+    },
+    "measurement_092": {
+        "height":   67,
+        "nozzle":   19
+    },
+    "measurement_093": {
+        "height":   62.5,
+        "nozzle":   19
+    },
+    "measurement_094": {
+        "height":   55,
+        "nozzle":   19
+    },
+    "measurement_095": {
+        "height":   51,
+        "nozzle":   19
+    },
+    "measurement_096": {
+        "height":   45,
+        "nozzle":   19
+    },
+    "measurement_097": {
+        "height":   41,
+        "nozzle":   19
+    },
+    "measurement_098": {
+        "height":   42,
+        "nozzle":   19
+    },
+    "measurement_099": {
+        "height":   43,
+        "nozzle":   19
+    },
+    "measurement_100": {
+        "height":   33.5,
+        "nozzle":   19
+    },
+    "measurement_101": {
+        "height":   29.5,
+        "nozzle":   19
+    },
+    "measurement_102": {
+        "height":   24.5,
+        "nozzle":   19
+    },
+    "measurement_103": {
+        "height":   2,
+        "nozzle":   19
+    },
+    "measurement_104": {
+        "height":   -3,
+        "nozzle":   19
+    },
+    "measurement_105": {
+        "height":   -8,
+        "nozzle":   19
+    },
+    "measurement_106": {
+        "height":   -13,
+        "nozzle":   19
+    },
+    "measurement_107": {
+        "height":   -17,
+        "nozzle":   19
+    },
+    "measurement_108": {
+        "height":   -25,
+        "nozzle":   19
+    },
+    "measurement_109": {
+        "height":   -30,
+        "nozzle":   19
+    },
+    "measurement_110": {
+        "height":   -37.5,
+        "nozzle":   19
+    },
+    "measurement_111": {
+        "height":   128,
+        "nozzle":   20
+    },
+    "measurement_112": {
+        "height":   128,
+        "nozzle":   20
+    },
+    "measurement_113": {
+        "height":   128,
+        "nozzle":   21
+    },
+    "measurement_114": {
+        "height":   128,
+        "nozzle":   21
+    },
+    "measurement_115": {
+        "height":   128,
+        "nozzle":   22
+    },
+    "measurement_116": {
+        "height":   124,
+        "nozzle":   22
+    },
+    "measurement_117": {
+        "height":   124,
+        "nozzle":   21
+    },
+    "measurement_118": {
+        "height":   119,
+        "nozzle":   21
+    },
+    "measurement_119": {
+        "height":   119,
+        "nozzle":   22
+    },
+    "measurement_120": {
+        "height":   112,
+        "nozzle":   22
+    },
+    "measurement_121": {
+        "height":   112,
+        "nozzle":   21
+    },
+    "measurement_122": {
+        "height":   106,
+        "nozzle":   21
+    },
+    "measurement_123": {
+        "height":   106,
+        "nozzle":   22
+    }
+}
