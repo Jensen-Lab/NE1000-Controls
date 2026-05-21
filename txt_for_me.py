@@ -48,7 +48,7 @@ for i,file in enumerate(files):
     try:
         with open(file,'rt') as text:
             data = text.read().replace('"','')
-        data = pd.read_csv(io.StringIO(data),names=['flow','p1'],usecols=[0,2],header=None)
+        data = pd.read_csv(io.StringIO(data),names=['flow','p1'],usecols=[0,1],header=None)
     except:
         continue
 
