@@ -68,12 +68,12 @@ for i,file in enumerate(files):
     
     # Time series of data
     if output_type=='tf':
-        plt.plot(flow_cal(data['flow'].to_numpy()),'.')
+        plt.plot(calibrated_flowrate,'.')
         plt.xlabel('Time [s]')
         plt.ylabel('Flowrate [mlh]')
 
     if 'tp' in output_type:
-        plt.plot(pres_cal(data['p1'].to_numpy(),p_app),'.')
+        plt.plot(calibrated_pressure,'.')
         if 'tpp'==output_type:
             plt.plot(calibrated_pressure,'.')
         plt.xlabel('Time [s]')
@@ -82,14 +82,14 @@ for i,file in enumerate(files):
     # Full scatter of data
     if output_type=='s':
         plot_p = calibrated_pressure
-        plot_q = flow_cal(data['flow'].to_numpy())
+        plot_q = calibrated_flowrate
         plt.scatter(plot_p,plot_q,c=np.linspace(0,1,len(plot_p)),cmap='rainbow')
         plt.ylabel('Flowrate [mlh]')
         plt.xlabel('Pressure [kPa]')
 
     # Scatter of mean values
     if output_type=='sm':
-        plt.plot(np.mean(calibrated_pressure),np.mean(flow_cal(data['flow'].to_numpy())),'o',c='crimson' if channel==ignore_type[0] else 'seagreen')
+        plt.plot(np.mean(calibrated_pressure),np.mean(calibrated_flowrate),'o',c='crimson' if channel==ignore_type[0] else 'seagreen')
         plt.xlabel('Pressure [kPa]')
         plt.ylabel('Flowrate [mlh]')
 
