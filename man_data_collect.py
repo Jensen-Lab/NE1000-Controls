@@ -5,7 +5,6 @@ import glob
 import os
 import threading
 
-# ⚠ Adjust this if your port name is different in WSL (e.g. '/dev/ttyS3' or similar)
 ser = srl.Serial('/dev/ttyACM0', 250000, timeout=2)
 ser.flushInput()
 time.sleep(5)
@@ -15,7 +14,7 @@ os.makedirs(parent_folder, exist_ok=True)
 
 iterator = len(glob.glob(os.path.join(parent_folder, "measurement_*.csv")))
 
-stop_measurement = False  # flag controlled by input() thread
+stop_measurement = False
 
 
 def printout1():
@@ -48,9 +47,6 @@ def printout3(decoded_bytes):
 
 
 def wait_for_stop():
-    """
-    Runs in a background thread, waits for 'q' + Enter to stop measurement.
-    """
     global stop_measurement
     while True:
         cmd = input().strip().lower()
@@ -60,7 +56,6 @@ def wait_for_stop():
 
 
 while True:
-    # Wait for experiment to commence
     printout1()
     cmd = input("> ").strip().lower()
 
@@ -68,17 +63,15 @@ while True:
         print("Exiting.")
         break
     if cmd != 's':
-        continue  # anything else: re-show screen
+        continue
 
     iterator += 1
     printout2()
 
-    # Start background thread that waits for 'q'
     stop_measurement = False
     stopper_thread = threading.Thread(target=wait_for_stop, daemon=True)
     stopper_thread.start()
 
-    # Measurement loop
     measurement_filename = os.path.join(parent_folder, f'measurement_{int(iterator)}.csv')
 
     print(f"Writing data to: {measurement_filename}")
