@@ -7,41 +7,44 @@ import io
 import glob
 import json
 
-output_type = str(input('Output (time(tp/tf)/scatter(s)): '))
-ignore_type = str(input('Ignore nozzles: '))
+ignore_type = str(input('Channel index: '))
+output_type = str(input('Output type: '))
+
+# Selecetion correct data files
 try:
     ignore_type = list(map(lambda x:int(x),list(ignore_type.split(' '))))
 except:
     ignore_type = [None]
 
-# Selecetion correct data files
-
+# Loading values for calibration
 min_length = 0
 line = lambda x,m,b:m*x+b
+with open('./.sensor_calibration.json') as jf:
+    cal_vals = json.load(jf)
+    flow_cal = lambda Q:line(Q[min_length:],cal_vals['FlowrateSensor']['SensorCalibrationValue1'],cal_vals['FlowrateSensor']['SensorCalibrationValue2'])
+    pres_cal = lambda P:line(P[min_length:],cal_vals['PressureSensor']['SensorCalibrationValue1'],cal_vals['PressureSensor']['SensorCalibrationValue2'])
 
-# flow_cal = lambda Q:Q[300:]*0.89456928+2.1059525 old cal for previous flow sensor
-flow_cal = lambda Q:line(Q[min_length:],0.86072889,-2.49415216)
-pres_cal = lambda P,h:line(P[min_length:],-5.10247957e-06,1.53065778e+00) if h>0 else line(P[min_length:],9.20808975e-05,-2.76466579e+01)
-no_cal = lambda A:A
 
+# Saving relevant values
 pressure = []
 flowrate = []
 flow_err = []
-height__ = []
+p_app__ = []
 raw_pres = []
 raw_flow = []
 
-data_directory = './Results_static_pressure/Results_static_pressure'
-files = glob.glob('./Results_static_pressure/Results_static_pressure/*')
+data_directory = './Results_static_pressure'
+files = glob.glob(f'{data_directory}/*')
 
 
 for i,file in enumerate(files):
     full_path = data_directory+file
     with open('./.exp_metadata.json') as jf:
         metadata = json.load(jf)
-        nozzle = metadata[file[50:66]]["nozzle"]
-        height = metadata[file[50:66]]["height"]
-        if nozzle not in ignore_type:
+        measurement_file_data = file.split('/')[-1].split('.')[0]
+        channel = metadata[measurement_file_data]["channel_index"]
+        p_app = metadata[measurement_file_data]["applied_pressure"]
+        if channel not in ignore_type:
             continue
 
     # Reading the data files
@@ -52,13 +55,16 @@ for i,file in enumerate(files):
     except:
         continue
 
-    pressure.append(np.mean(pres_cal(data['p1'],height)))
-    flowrate.append(np.mean(flow_cal(data['flow'])))
+    calibrated_pressure = pres_cal(data['p1'])
+    calibrated_flowrate = flow_cal(data['flow'])
 
-    par,_ = sp.optimize.curve_fit(lambda x,m,b:m*x+b,pres_cal(data['p1'],height),flow_cal(data['flow']))
-    error = np.sqrt(np.var(flow_cal(data['flow']))+np.var(pres_cal(data['p1'],height))*par[0]**2)
+    pressure.append(np.mean(calibrated_pressure))
+    flowrate.append(np.mean(calibrated_flowrate))
+
+    par,_ = sp.optimize.curve_fit(lambda x,m,b:m*x+b,calibrated_pressure,calibrated_flowrate)
+    error = np.sqrt(np.var(calibrated_flowrate)+np.var(calibrated_pressure)*par[0]**2)
     flow_err.append(error)
-    height__.append(height/10)
+    p_app__.append(p_app)
     
     # Time series of data
     if output_type=='tf':
@@ -67,40 +73,37 @@ for i,file in enumerate(files):
         plt.ylabel('Flowrate [mlh]')
 
     if 'tp' in output_type:
-        plt.plot(pres_cal(data['p1'].to_numpy(),height),'.')
+        plt.plot(pres_cal(data['p1'].to_numpy(),p_app),'.')
         if 'tpp'==output_type:
-            plt.plot(sp.ndimage.gaussian_filter(pres_cal(data['p1'].to_numpy(),height),20),'.')
+            plt.plot(calibrated_pressure,'.')
         plt.xlabel('Time [s]')
         plt.ylabel('Pressure [kPa]')
 
     # Full scatter of data
     if output_type=='s':
-        plot_p = pres_cal(data['p1'].to_numpy(),height)
+        plot_p = calibrated_pressure
         plot_q = flow_cal(data['flow'].to_numpy())
-        plot_h = np.array([height for _,_ in enumerate(plot_p)])/10
         plt.scatter(plot_p,plot_q,c=np.linspace(0,1,len(plot_p)),cmap='rainbow')
-        if i==0:
-            plt.colorbar()
         plt.ylabel('Flowrate [mlh]')
         plt.xlabel('Pressure [kPa]')
 
     # Scatter of mean values
     if output_type=='sm':
-        plt.plot(np.mean(pres_cal(data['p1'].to_numpy(),height)),np.mean(flow_cal(data['flow'].to_numpy())),'o',c='crimson' if nozzle==ignore_type[0] else 'seagreen')
+        plt.plot(np.mean(calibrated_pressure),np.mean(flow_cal(data['flow'].to_numpy())),'o',c='crimson' if channel==ignore_type[0] else 'seagreen')
         plt.xlabel('Pressure [kPa]')
         plt.ylabel('Flowrate [mlh]')
 
     # Calibration plots
     if output_type=='cp':
         sensor_val = np.mean(data['p1'].to_numpy())
-        plt.plot(height/10,sensor_val,'.',c='seagreen')
+        plt.plot(p_app,sensor_val,'.',c='seagreen')
         plt.xlabel('Applied Pressure [Pa]')
         plt.ylabel('Sensor Readout [a.u.]')
         raw_pres.append(sensor_val)
 
     if output_type=='cf':
         sensor_val = np.mean(data['flow'].to_numpy())
-        plt.plot(height,sensor_val,'.',c='seagreen')
+        plt.plot(p_app,sensor_val,'.',c='seagreen')
         plt.xlabel('Applied Flowrate [mlh]')
         plt.ylabel('Sensor Readout [a.u.]')
         raw_flow.append(sensor_val)
@@ -109,15 +112,15 @@ for i,file in enumerate(files):
         
 # Calibration plots
 if output_type=='cp':
-    par,_ = sp.optimize.curve_fit(line,raw_pres,height__)
-    print(par)
-    par,_ = sp.optimize.curve_fit(line,height__,raw_pres)
-    plt.plot(height__,line(np.array(height__),*par),'--',c='goldenrod')
+    par,_ = sp.optimize.curve_fit(line,raw_pres,p_app__)
+    print(f'SensorCalibrationValue1: {par[0]} \nSensorCalibrationValue2: {par[1]}')
+    par,_ = sp.optimize.curve_fit(line,p_app__,raw_pres)
+    plt.plot(p_app__,line(np.array(p_app__),*par),'--',c='goldenrod')
 
 if output_type=='cf':
-    flow__ = 10*np.array(height__)
+    flow__ = 10*np.array(p_app__)
     par,_ = sp.optimize.curve_fit(line,raw_flow,flow__)
-    print(par)
+    print(f'SensorCalibrationValue1: {par[0]} \nSensorCalibrationValue2: {par[1]}')
     par,_ = sp.optimize.curve_fit(line,flow__,raw_flow)
     plt.plot(flow__,line(flow__,*par),'--',c='goldenrod')
 
@@ -129,11 +132,6 @@ if output_type=='r':
 # Write data to file
 if len(ignore_type)==1 and output_type=='w':
     print('Saving file')
-    np.savetxt(f'presflow_{ignore_type[0]}.csv',np.asarray([pressure,flowrate,flow_err]).T,delimiter=',')
-
-if len(ignore_type)==1 and output_type=='wn':
-    print('Saving file')
-    pressure = list(map(lambda x:x-19.5,pressure))
     np.savetxt(f'presflow_{ignore_type[0]}.csv',np.asarray([pressure,flowrate,flow_err]).T,delimiter=',')
 
 plt.show()

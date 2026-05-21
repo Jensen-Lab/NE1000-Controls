@@ -1,0 +1,10 @@
+{
+    "PressureSensor": {
+        "SensorCalibrationValue1": 1,
+        "SensorCalibrationValue2": 1
+    },
+    "FlowrateSensor": {
+        "SensorCalibrationValue1": 1,
+        "SensorCalibrationValue2": 1
+    }
+}
