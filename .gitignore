@@ -1,2 +1,6 @@
 .vscode/*
 Results*
+.exp_metadata*
+*.npy
+*.csv
+get_data

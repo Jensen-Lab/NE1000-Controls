@@ -20,12 +20,15 @@ min_length = 0
 
 # flow_cal = lambda Q:Q[300:]*0.89456928+2.1059525 old cal for previous flow sensor
 flow_cal = lambda Q:Q[min_length:]*0.48877946-0.09915247
-pres_cal = lambda P:880+(P[min_length:]-48585.84344079)/-246.26589948
+pres_cal = lambda P:(P[min_length:]-48585.84344079)/-246.26589948
+no_cal = lambda A:A
 
 pressure = []
 flowrate = []
 pressure_0 = []
 flowrate_0 = []
+flow_err = []
+height__ = []
 
 data_directory = './Results_static_pressure/Results_static_pressure'
 
@@ -42,7 +45,6 @@ run_only_once = 1
 
 for i,file in enumerate(files):#[-14:-8]:
     full_path = data_directory+file
-    print(file)
     with open('./.exp_metadata.json') as jf:
         metadata = json.load(jf)
         nozzle = metadata[file[50:65]]["nozzle"]
@@ -59,12 +61,24 @@ for i,file in enumerate(files):#[-14:-8]:
         continue
 
     # Addimg mean values to array
+    # pressure.append(np.mean(pres_cal(data['p1']))-11e3 if nozzle==31 else np.mean(pres_cal(data['p1']))+11e3)
     # pressure.append(np.mean(pres_cal(data['p1'])))
-    # flowrate.append(np.mean(flow_cal(data['flow'])))
+    # if nozzle==31:
+    #     pressure.append(np.mean(pres_cal(data['p1'])*1.05266531e-03-1.13215117e+01))
+    # elif nozzle==32:
+    #     pressure.append(np.mean(pres_cal(data['p1'])*1.16430115e-03+1.26498804e+01))
+    # else:
+    pressure.append(np.mean(pres_cal(data['p1'])))
+    flowrate.append(np.mean(flow_cal(data['flow'])))
+
+    par,_ = sp.optimize.curve_fit(lambda x,m,b:m*x+b,pres_cal(data['p1']),flow_cal(data['flow']))
+    error = np.sqrt(np.var(flow_cal(data['flow']))+np.var(pres_cal(data['p1']))*par[0]**2)
+    flow_err.append(error)
+    height__.append(height/10)
 
     # Time series of data
     if output_type=='tf':
-        plt.plot(flow_cal(data['flow'].to_numpy())/1e3,'.')
+        plt.plot(flow_cal(data['flow'].to_numpy()),'.')
         plt.xlabel('Time [s]')
         plt.ylabel('Flowrate [mlh]')
 
@@ -97,7 +111,11 @@ for i,file in enumerate(files):#[-14:-8]:
         plt.xlabel('Pressure [kPa]')
 
     if output_type=='sm':
-        plt.plot(np.mean(pres_cal(data['p1'].to_numpy())/1e3),np.mean(flow_cal(data['flow'].to_numpy())),'o',c='crimson')
+        plt.plot(np.mean(pres_cal(data['p1'].to_numpy())/1e3),np.mean(flow_cal(data['flow'].to_numpy())),'o',c='crimson' if nozzle==ignore_type[0] else 'seagreen')
+        plt.xlabel('Pressure (scaled, non-centered values)')
+        plt.ylabel('Flowrate [mlh]')
+        # plt.plot(np.abs(np.mean(pres_cal(data['p1'].to_numpy())/1e3)),np.abs(np.mean(flow_cal(data['flow'].to_numpy()))),'o',c='crimson' if nozzle==ignore_type[0] else 'seagreen')
+
 
     if 'fit' in output_type:
         flow_data = flow_cal(data['flow'].to_numpy())
@@ -119,6 +137,22 @@ for i,file in enumerate(files):#[-14:-8]:
             plt.plot(full_range_pres,full_range_flow,'.',c='cornflowerblue')
             plt.plot(full_range_pres,line(full_range_pres,*par),'--',c='crimson')
             run_only_once=1
+
+    if output_type=='c':
+        corr = np.corrcoef(data['flow'],data['p1'])
+        print(corr)
+
+pressure = np.array(pressure)
+plt.show()
+plt.plot(height__,pressure,'.')
+
+par,cov = sp.optimize.curve_fit(lambda x,m,b,a:a*x**2+m*x+b,height__,pressure*9.96444152e-04+9)
+
+print(par)
+
+# np.savetxt(f'height_pres_{ignore_type[0]}.csv',np.asarray([height__,pressure]).T,delimiter=',')
+
+# np.savetxt(f'presflow_{ignore_type[0]}.csv',np.asarray([flowrate,pressure,flow_err]).T,delimiter=',')
 
 # plt.legend()
 plt.show()
