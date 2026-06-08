@@ -24,7 +24,7 @@ def printout1():
     print('Welcome to manual data acquisition')
     print(f'Current readout is: {decoded_bytes}')
     print("Type 's' and press Enter to start measurement, or 'x' + Enter to exit.")
-    time.sleep(1)
+    time.sleep(1.5)
 
 
 def printout2():
@@ -49,21 +49,39 @@ def printout3(decoded_bytes):
 def wait_for_stop():
     global stop_measurement
     while True:
-        cmd = input().strip().lower()
+        cmd = input("> ").strip().lower()
         if cmd == 'q':
             stop_measurement = True
             break
 
+def wait_for_start():
+    global start_measurement
+    global exit_measurement
+    while True:
+        cmd = input("> ").strip().lower()
+        if cmd == 's':
+            start_measurement = True
+            break
+        elif cmd == 'x':
+            exit_measurement = True
+            break
 
 while True:
-    printout1()
-    cmd = input("> ").strip().lower()
+    os.system('clear')
 
-    if cmd == 'x':
+    start_measurement = False
+    exit_measurement = False
+    starter_thread = threading.Thread(target=wait_for_start, daemon=True)
+    starter_thread.start()
+
+    while not start_measurement and not exit_measurement:
+        printout1()
+
+    if exit_measurement:
         print("Exiting.")
         break
-    if cmd != 's':
-        continue
+    if start_measurement:
+        pass
 
     iterator += 1
     printout2()
@@ -76,6 +94,8 @@ while True:
 
     print(f"Writing data to: {measurement_filename}")
     print("Type 'q' + Enter at any time to stop.\n")
+
+    ser.reset_input_buffer()
 
     with open(measurement_filename, "a", newline="") as f:
         writer = csv.writer(f, delimiter=",")
