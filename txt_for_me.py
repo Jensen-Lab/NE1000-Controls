@@ -86,7 +86,9 @@ for i,file in enumerate(files):
 
     # Scatter of mean values
     if output_type=='sm':
-        plt.plot(np.mean(pres_cal(data['p1'].to_numpy(),height)),np.mean(flow_cal(data['flow'].to_numpy())),'o',c='crimson' if nozzle==ignore_type[0] else 'seagreen')
+        plt.axvline(0,lw=0.5,c='black')
+        plt.axhline(0,lw=0.5,c='black')
+        plt.plot(np.mean(pres_cal(data['p1'].to_numpy(),height))-19.76,np.mean(flow_cal(data['flow'].to_numpy())),'o',c='crimson' if nozzle==ignore_type[0] else 'seagreen')
         plt.xlabel('Pressure [kPa]')
         plt.ylabel('Flowrate [mlh]')
 
@@ -104,6 +106,7 @@ for i,file in enumerate(files):
         plt.xlabel('Applied Flowrate [mlh]')
         plt.ylabel('Sensor Readout [a.u.]')
         raw_flow.append(sensor_val)
+        
 
 #################################################################      
         
@@ -123,17 +126,36 @@ if output_type=='cf':
 
 # Estimate linear resistance
 if output_type=='r':
+    pressure = list(map(lambda x:x-19.76,pressure))
     par,cov = sp.optimize.curve_fit(line,flowrate,pressure)
     print(par[0],' + ',np.sqrt(cov[0,0]))
+    print(par[1])
 
-# Write data to file
+# Write raw data to file
 if len(ignore_type)==1 and output_type=='w':
     print('Saving file')
     np.savetxt(f'presflow_{ignore_type[0]}.csv',np.asarray([pressure,flowrate,flow_err]).T,delimiter=',')
 
+# Write 0 point calibrated data to file with length and radius
 if len(ignore_type)==1 and output_type=='wn':
     print('Saving file')
-    pressure = list(map(lambda x:x-19.5,pressure))
-    np.savetxt(f'presflow_{ignore_type[0]}.csv',np.asarray([pressure,flowrate,flow_err]).T,delimiter=',')
+    pressure = list(map(lambda x:x-19.76,pressure))
+    flowrate = list(map(lambda x:x+0.74,flowrate))
+    with open('.exp_metadata.json') as f:
+        metadata = json.load(f)
+        for measurement in metadata.values():
+            if measurement.get('nozzle') == ignore_type[0]:
+                length = int(measurement['length'])
+                radius = float(measurement['radius'])/100
+                break
+
+    array_length = len(pressure)
+
+    q_ = np.sort(np.abs(flowrate))[:4]
+    p_ = np.sort(np.abs(pressure))[:4]
+    par,_ = sp.optimize.curve_fit(line,p_,q_)
+    flowrate = list(map(lambda x:x+par[1],flowrate))
+
+    np.savetxt(f'presflow_{ignore_type[0]}.csv',np.asarray([pressure,flowrate,flow_err,[length for _ in range(array_length)],[radius for _ in range(array_length)]]).T,delimiter=',')
 
 plt.show()
