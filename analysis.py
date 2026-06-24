@@ -16,6 +16,10 @@ try:
 except:
     channels = [None]
 
+# Physical constants for converting a water column height into a pressure
+RHO_WATER = 1000.0   # kg/m^3
+G = 9.81             # m/s^2
+
 # Loading values for calibration
 min_length = 0
 line = lambda x, m, b: m*x + b
@@ -52,7 +56,13 @@ for file in files:
             continue
         channel = metadata[measurement_file_data].get("channel_index")
         q_app = metadata[measurement_file_data].get("applied_flowrate")
-        p_app = metadata[measurement_file_data].get("applied_pressure")
+        # For calibration the metadata only stores the water column height (in
+        # cm); the applied pressure is computed from it with P = rho * g * h.
+        height_cm = metadata[measurement_file_data].get("height")
+        if output_type == 'cp' and height_cm is not None:
+            p_app = RHO_WATER * G * (height_cm / 100.0)
+        else:
+            p_app = metadata[measurement_file_data].get("applied_pressure")
         # Calibration is a sensor-level operation, so the channel is irrelevant
         # there; every other mode filters on the requested channel(s).
         if output_type != 'cp' and channel not in channels:

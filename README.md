@@ -13,7 +13,7 @@ Keeping them in separate folders means calibration and experiment data never get
 
 ## Logging of data
 Metadata is stored in JSON files, one per phase. Neither is tracked with git, so they have to be updated locally. The key of each entry must match the csv filename (without ".csv").
-- ".cal_metadata.json" (calibration measurements). Each entry holds only "applied_pressure" - the known reference pressure applied to the sensor (e.g. from a water column). Calibration is sensor-level, so no channel is needed and the "Channel index" prompt is ignored in "cp" mode.
+- ".cal_metadata.json" (calibration measurements). Each entry holds only "height" - the water column height in centimeters. The applied pressure is computed automatically in "cp" mode as P = rho * g * h (water, rho = 1000 kg/m^3). Calibration is sensor-level, so no channel is needed and the "Channel index" prompt is ignored in "cp" mode. (An explicit "applied_pressure" field is still honored as a fallback if no "height" is given.)
 - ".exp_metadata.json" (experiment measurements). Each entry holds "channel_index" and "applied_flowrate" - the flowrate imposed by the syringe pump (the known independent variable).
 More fields can be added at will and then loaded from the analysis script.
 
