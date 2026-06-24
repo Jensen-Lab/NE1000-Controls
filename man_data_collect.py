@@ -9,7 +9,7 @@ ser = srl.Serial('/dev/ttyACM0', 250000, timeout=2)
 ser.flushInput()
 time.sleep(5)
 
-parent_folder = './Results_static_pressure'
+parent_folder = './Results_calibration'
 os.makedirs(parent_folder, exist_ok=True)
 
 iterator = len(glob.glob(os.path.join(parent_folder, "measurement_*.csv")))

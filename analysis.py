@@ -7,131 +7,118 @@ import io
 import glob
 import json
 
-ignore_type = str(input('Channel index: '))
+channels = str(input('Channel index: '))
 output_type = str(input('Output type: '))
 
-# Selecetion correct data files
+# Channels to include in the analysis (space separated for several)
 try:
-    ignore_type = list(map(lambda x:int(x),list(ignore_type.split(' '))))
+    channels = list(map(lambda x: int(x), list(channels.split(' '))))
 except:
-    ignore_type = [None]
+    channels = [None]
 
 # Loading values for calibration
 min_length = 0
-line = lambda x,m,b:m*x+b
+line = lambda x, m, b: m*x + b
 with open('./.sensor_calibration.json') as jf:
     cal_vals = json.load(jf)
-    flow_cal = lambda Q:line(Q[min_length:],cal_vals['FlowrateSensor']['SensorCalibrationValue1'],cal_vals['FlowrateSensor']['SensorCalibrationValue2'])
-    pres_cal = lambda P:line(P[min_length:],cal_vals['PressureSensor']['SensorCalibrationValue1'],cal_vals['PressureSensor']['SensorCalibrationValue2'])
-
+    pres_cal = lambda P: line(P[min_length:],
+                              cal_vals['PressureSensor']['SensorCalibrationValue1'],
+                              cal_vals['PressureSensor']['SensorCalibrationValue2'])
 
 # Saving relevant values
-pressure = []
-flowrate = []
-flow_err = []
-p_app__ = []
-raw_pres = []
-raw_flow = []
+pressure = []        # mean calibrated pressure per measurement
+pres_err = []        # spread (std) of pressure per measurement
+applied_flow = []    # applied flowrate (from syringe pump, metadata)
+applied_pres = []    # applied pressure (known reference, only used for calibration)
+raw_pres = []        # raw sensor readout (only used for calibration)
 
-data_directory = './Results_static_pressure'
+# Calibration ('cp') and experiment data live in separate folders, each with
+# their own metadata file, so the two never get mixed up.
+if output_type == 'cp':
+    data_directory = './Results_calibration'
+    metadata_file = './.cal_metadata.json'
+else:
+    data_directory = './Results_static_pressure'
+    metadata_file = './.exp_metadata.json'
+
 files = glob.glob(f'{data_directory}/*')
 
 
-for i,file in enumerate(files):
-    full_path = data_directory+file
-    with open('./.exp_metadata.json') as jf:
+for file in files:
+    with open(metadata_file) as jf:
         metadata = json.load(jf)
-        measurement_file_data = file.split('/')[-1].split('.')[0]
-        channel = metadata[measurement_file_data]["channel_index"]
-        p_app = metadata[measurement_file_data]["applied_pressure"]
-        if channel not in ignore_type:
+        measurement_file_data = os.path.splitext(os.path.basename(file))[0]
+        if measurement_file_data not in metadata:
+            continue
+        channel = metadata[measurement_file_data].get("channel_index")
+        q_app = metadata[measurement_file_data].get("applied_flowrate")
+        p_app = metadata[measurement_file_data].get("applied_pressure")
+        # Calibration is a sensor-level operation, so the channel is irrelevant
+        # there; every other mode filters on the requested channel(s).
+        if output_type != 'cp' and channel not in channels:
             continue
 
-    # Reading the data files
+    # Reading the data files. The Arduino sends "flow,pressure" but only the
+    # pressure column is used here; the flowrate is the known applied value.
     try:
-        with open(file,'rt') as text:
-            data = text.read().replace('"','')
-        data = pd.read_csv(io.StringIO(data),names=['flow','p1'],usecols=[0,1],header=None)
+        with open(file, 'rt') as text:
+            data = text.read().replace('"', '')
+        data = pd.read_csv(io.StringIO(data), names=['flow', 'p1'], usecols=[0, 1], header=None)
     except:
         continue
 
     calibrated_pressure = pres_cal(data['p1'])
-    calibrated_flowrate = flow_cal(data['flow'])
 
     pressure.append(np.mean(calibrated_pressure))
-    flowrate.append(np.mean(calibrated_flowrate))
+    pres_err.append(np.std(calibrated_pressure))
+    applied_flow.append(q_app)
+    applied_pres.append(p_app)
 
-    par,_ = sp.optimize.curve_fit(lambda x,m,b:m*x+b,calibrated_pressure,calibrated_flowrate)
-    error = np.sqrt(np.var(calibrated_flowrate)+np.var(calibrated_pressure)*par[0]**2)
-    flow_err.append(error)
-    p_app__.append(p_app)
-    
-    # Time series of data
-    if output_type=='tf':
-        plt.plot(calibrated_flowrate,'.')
-        plt.xlabel('Time [s]')
-        plt.ylabel('Flowrate [mlh]')
-
+    # Time series of pressure
     if 'tp' in output_type:
-        plt.plot(calibrated_pressure,'.')
-        if 'tpp'==output_type:
-            plt.plot(calibrated_pressure,'.')
+        plt.plot(calibrated_pressure, '.')
         plt.xlabel('Time [s]')
         plt.ylabel('Pressure [kPa]')
 
-    # Full scatter of data
-    if output_type=='s':
-        plot_p = calibrated_pressure
-        plot_q = calibrated_flowrate
-        plt.scatter(plot_p,plot_q,c=np.linspace(0,1,len(plot_p)),cmap='rainbow')
-        plt.ylabel('Flowrate [mlh]')
-        plt.xlabel('Pressure [kPa]')
+    # Full scatter: every pressure sample against the applied flowrate
+    if output_type == 's':
+        plt.scatter([q_app]*len(calibrated_pressure), calibrated_pressure,
+                    c=np.linspace(0, 1, len(calibrated_pressure)), cmap='rainbow')
+        plt.xlabel('Applied flowrate [mlh]')
+        plt.ylabel('Pressure [kPa]')
 
-    # Scatter of mean values
-    if output_type=='sm':
-        plt.plot(np.mean(calibrated_pressure),np.mean(calibrated_flowrate),'o',c='crimson' if channel==ignore_type[0] else 'seagreen')
-        plt.xlabel('Pressure [kPa]')
-        plt.ylabel('Flowrate [mlh]')
+    # Scatter of mean pressure against the applied flowrate
+    if output_type == 'sm':
+        plt.plot(q_app, np.mean(calibrated_pressure), 'o', c='seagreen')
+        plt.xlabel('Applied flowrate [mlh]')
+        plt.ylabel('Pressure [kPa]')
 
-    # Calibration plots
-    if output_type=='cp':
+    # Calibration plot: known applied pressure vs raw sensor readout
+    if output_type == 'cp':
         sensor_val = np.mean(data['p1'].to_numpy())
-        plt.plot(p_app,sensor_val,'.',c='seagreen')
+        plt.plot(p_app, sensor_val, '.', c='seagreen')
         plt.xlabel('Applied Pressure [Pa]')
         plt.ylabel('Sensor Readout [a.u.]')
         raw_pres.append(sensor_val)
 
-    if output_type=='cf':
-        sensor_val = np.mean(data['flow'].to_numpy())
-        plt.plot(p_app,sensor_val,'.',c='seagreen')
-        plt.xlabel('Applied Flowrate [mlh]')
-        plt.ylabel('Sensor Readout [a.u.]')
-        raw_flow.append(sensor_val)
+#################################################################
 
-#################################################################      
-        
-# Calibration plots
-if output_type=='cp':
-    par,_ = sp.optimize.curve_fit(line,raw_pres,p_app__)
+# Calibration fit
+if output_type == 'cp':
+    par, _ = sp.optimize.curve_fit(line, raw_pres, applied_pres)
     print(f'SensorCalibrationValue1: {par[0]} \nSensorCalibrationValue2: {par[1]}')
-    par,_ = sp.optimize.curve_fit(line,p_app__,raw_pres)
-    plt.plot(p_app__,line(np.array(p_app__),*par),'--',c='goldenrod')
+    par, _ = sp.optimize.curve_fit(line, applied_pres, raw_pres)
+    plt.plot(applied_pres, line(np.array(applied_pres), *par), '--', c='goldenrod')
 
-if output_type=='cf':
-    flow__ = 10*np.array(p_app__)
-    par,_ = sp.optimize.curve_fit(line,raw_flow,flow__)
-    print(f'SensorCalibrationValue1: {par[0]} \nSensorCalibrationValue2: {par[1]}')
-    par,_ = sp.optimize.curve_fit(line,flow__,raw_flow)
-    plt.plot(flow__,line(flow__,*par),'--',c='goldenrod')
-
-# Estimate linear resistance
-if output_type=='r':
-    par,cov = sp.optimize.curve_fit(line,flowrate,pressure)
-    print(par[0],' + ',np.sqrt(cov[0,0]))
+# Estimate linear resistance: pressure vs applied flowrate
+if output_type == 'r':
+    par, cov = sp.optimize.curve_fit(line, applied_flow, pressure)
+    print(par[0], ' + ', np.sqrt(cov[0, 0]))
 
 # Write data to file
-if len(ignore_type)==1 and output_type=='w':
+if len(channels) == 1 and output_type == 'w':
     print('Saving file')
-    np.savetxt(f'presflow_{ignore_type[0]}.csv',np.asarray([pressure,flowrate,flow_err]).T,delimiter=',')
+    np.savetxt(f'presflow_{channels[0]}.csv',
+               np.asarray([applied_flow, pressure, pres_err]).T, delimiter=',')
 
 plt.show()
