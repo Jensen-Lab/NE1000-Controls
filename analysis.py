@@ -120,20 +120,20 @@ for file in files:
     if 'tp' in output_type:
         plt.plot(calibrated_pressure, '.')
         plt.xlabel('Time [s]')
-        plt.ylabel('Pressure [kPa]')
+        plt.ylabel('Pressure [Pa]')
 
     # Full scatter: every pressure sample against the applied flowrate
     if output_type == 's':
         plt.scatter([q_app]*len(calibrated_pressure), calibrated_pressure,
                     c=np.linspace(0, 1, len(calibrated_pressure)), cmap='rainbow')
         plt.xlabel('Applied flowrate [mlh]')
-        plt.ylabel('Pressure [kPa]')
+        plt.ylabel('Pressure [Pa]')
 
     # Scatter of mean pressure against the applied flowrate
     if output_type == 'sm':
         plt.plot(q_app, np.mean(calibrated_pressure), 'o', c='seagreen')
         plt.xlabel('Applied flowrate [mlh]')
-        plt.ylabel('Pressure [kPa]')
+        plt.ylabel('Pressure [Pa]')
 
     # Calibration plot: known applied pressure vs raw sensor readout
     if output_type == 'cp':
