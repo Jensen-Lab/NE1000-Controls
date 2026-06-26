@@ -2,6 +2,7 @@
 Results*
 .exp_metadata*
 .cal_metadata*
+.sensor_calibration*
 *.npy
 *.csv
 get_data

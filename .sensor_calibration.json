@@ -1,6 +1,6 @@
 {
     "PressureSensor": {
-        "SensorCalibrationValue1": 1,
-        "SensorCalibrationValue2": 1
+        "SensorCalibrationValue1": -0.0056402888866786275,
+        "SensorCalibrationValue2": 366.97085388127095
     }
 }
