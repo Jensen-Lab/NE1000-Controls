@@ -19,6 +19,10 @@ except:
 min_length = 0
 line = lambda x,m,b:m*x+b
 
+# zero_point = -20.541698832974905
+zero_point = -19.76
+R0 = 0.07129654069884767*2/1.56
+
 # flow_cal = lambda Q:Q[300:]*0.89456928+2.1059525 old cal for previous flow sensor
 flow_cal = lambda Q:line(Q[min_length:],0.86072889,-2.49415216)
 pres_cal = lambda P,h:line(P[min_length:],-5.10247957e-06,1.53065778e+00) if h>0 else line(P[min_length:],9.20808975e-05,-2.76466579e+01)
@@ -88,7 +92,7 @@ for i,file in enumerate(files):
     if output_type=='sm':
         plt.axvline(0,lw=0.5,c='black')
         plt.axhline(0,lw=0.5,c='black')
-        plt.plot(np.mean(pres_cal(data['p1'].to_numpy(),height))-19.76,np.mean(flow_cal(data['flow'].to_numpy())),'o',c='crimson' if nozzle==ignore_type[0] else 'seagreen')
+        plt.plot(np.mean(pres_cal(data['p1'].to_numpy(),height))+zero_point,np.mean(flow_cal(data['flow'].to_numpy())),'o',c='crimson' if nozzle==ignore_type[0] else 'seagreen')
         plt.xlabel('Pressure [kPa]')
         plt.ylabel('Flowrate [mlh]')
 
@@ -126,10 +130,15 @@ if output_type=='cf':
 
 # Estimate linear resistance
 if output_type=='r':
-    pressure = list(map(lambda x:x-19.76,pressure))
+    pressure = list(map(lambda x:x,pressure))
     par,cov = sp.optimize.curve_fit(line,flowrate,pressure)
     print(par[0],' + ',np.sqrt(cov[0,0]))
     print(par[1])
+
+if output_type=='diff':
+    pressure = np.array(pressure)
+
+    plt.plot(np.sort(pressure)[:-1],np.diff(np.sort(pressure)),'.')
 
 # Write raw data to file
 if len(ignore_type)==1 and output_type=='w':
@@ -139,8 +148,9 @@ if len(ignore_type)==1 and output_type=='w':
 # Write 0 point calibrated data to file with length and radius
 if len(ignore_type)==1 and output_type=='wn':
     print('Saving file')
-    pressure = list(map(lambda x:x-19.76,pressure))
-    flowrate = list(map(lambda x:x+0.74,flowrate))
+    # pressure = list(map(lambda x:x+zero_point,pressure))
+    pressure = (np.array(pressure)+zero_point-R0*np.array(flowrate)).tolist()
+    flowrate = list(map(lambda x:x,flowrate))
     with open('.exp_metadata.json') as f:
         metadata = json.load(f)
         for measurement in metadata.values():
@@ -154,8 +164,12 @@ if len(ignore_type)==1 and output_type=='wn':
     q_ = np.sort(np.abs(flowrate))[:4]
     p_ = np.sort(np.abs(pressure))[:4]
     par,_ = sp.optimize.curve_fit(line,p_,q_)
-    flowrate = list(map(lambda x:x+par[1],flowrate))
-
+    # flowrate = list(map(lambda x:x+par[1],flowrate))
+    print(par[1])
+    plt.plot(pressure,flowrate,'o')
+    plt.plot(0,0,'o',c='r')
     np.savetxt(f'presflow_{ignore_type[0]}.csv',np.asarray([pressure,flowrate,flow_err,[length for _ in range(array_length)],[radius for _ in range(array_length)]]).T,delimiter=',')
 
 plt.show()
+
+#    printf "constantA\n$b\nconstantC\n" | python script.py
